@@ -53,7 +53,8 @@ dependencies = [
 [[package]]
 name = "anyrun-interface"
 version = "0.1.0"
-source = "git+https://github.com/Kirottu/anyrun#e14da6c37337ffa3ee1bc66965d58ef64c1590e5"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "7e8b75df6f440ed85d98072c47d1215447eb36e6d1ff9c9aa9562fa1cd445186"
 dependencies = [
  "abi_stable",
 ]
@@ -61,7 +62,8 @@ dependencies = [
 [[package]]
 name = "anyrun-macros"
 version = "0.1.0"
-source = "git+https://github.com/Kirottu/anyrun#e14da6c37337ffa3ee1bc66965d58ef64c1590e5"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "6c910a59fc096407041f5d1afc61132106e38868d1feea27e52f1045ee1e6c16"
 dependencies = [
  "quote",
  "syn 2.0.41",
@@ -70,7 +72,8 @@ dependencies = [
 [[package]]
 name = "anyrun-plugin"
 version = "0.1.0"
-source = "git+https://github.com/Kirottu/anyrun#e14da6c37337ffa3ee1bc66965d58ef64c1590e5"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "812c7d893370d269754d733d768f8fb2eb42934925e5174261b6d44e716b5792"
 dependencies = [
  "abi_stable",
  "anyrun-interface",
