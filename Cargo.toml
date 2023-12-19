@@ -1,0 +1,19 @@
+[workspace]
+members = ["cliphist"]
+resolver = "2"
+
+[workspace.dependencies]
+anyrun-plugin = { git = "https://github.com/Kirottu/anyrun" }
+abi_stable = "0.11.3"
+nucleo = "0.2.1"
+ron = "0.8.1"
+serde = { version = "1.0.193", features = ["derive"] }
+
+[profile.dev.build-override]
+opt-level = 0
+codegen-units = 256
+debug = false       # when possible
+
+[profile.release.build-override]
+opt-level = 0
+codegen-units = 256
