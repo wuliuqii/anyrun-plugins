@@ -1,3 +1,5 @@
+// copy from: https://github.com/helix-editor/helix/blob/5f04d09f030da0711b92894bd8dd6623135882ac/helix-core/src/fuzzy.rs
+
 use std::ops::DerefMut;
 
 use nucleo::pattern::{Atom, AtomKind, CaseMatching};
