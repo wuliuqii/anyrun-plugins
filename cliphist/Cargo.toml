@@ -11,7 +11,6 @@ crate-type = ["cdylib"]
 [dependencies]
 anyrun-plugin.workspace = true
 abi_stable.workspace = true
-nucleo.workspace = true
 ron.workspace = true
 serde.workspace = true
-fuzzy-matcher = "0.3.7"
+utils = { path = "../utils" }

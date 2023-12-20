@@ -1,24 +1,25 @@
 use abi_stable::std_types::{ROption, RString, RVec};
 use anyrun_plugin::*;
-use fuzzy_matcher::FuzzyMatcher;
 use serde::Deserialize;
 use std::fs;
 use std::io::Write;
 use std::process::{Command, Stdio};
 
+use utils::fuzzy_match;
+
 #[derive(Deserialize)]
-struct CliphistConfig {
+struct Config {
     max_entries: usize,
     cliphist_path: String,
     prefix: String,
 }
 
-impl Default for CliphistConfig {
+impl Default for Config {
     fn default() -> Self {
         Self {
             max_entries: 10,
             cliphist_path: "cliphist".into(),
-            prefix: "".into(),
+            prefix: ":v".into(),
         }
     }
 }
@@ -26,21 +27,33 @@ impl Default for CliphistConfig {
 #[derive(Debug)]
 enum Error {
     CliphistCommandFailed(std::io::Error),
-    CliphistReturnCodeError(i32),
-    StdinError,
-    Threaderror,
+    CliphistReturnErrorCode(i32),
+    Stdin,
+    Thread,
+}
+
+struct CliphistItem {
+    id: usize,
+    cliphist_id: String,
+    content: String,
+}
+
+impl AsRef<str> for CliphistItem {
+    fn as_ref(&self) -> &str {
+        &self.content
+    }
 }
 
 struct State {
-    config: CliphistConfig,
-    history: Vec<(usize, String, String)>,
+    config: Config,
+    history: Vec<CliphistItem>,
 }
 
 #[init]
 fn init(config_dir: RString) -> State {
     let config = match fs::read_to_string(format!("{}/cliphist.ron", config_dir)) {
         Ok(content) => ron::from_str(&content).unwrap_or_default(),
-        Err(_) => CliphistConfig::default(),
+        Err(_) => Config::default(),
     };
 
     let output = Command::new(&config.cliphist_path)
@@ -53,7 +66,7 @@ fn init(config_dir: RString) -> State {
             if o.status.success() {
                 Ok(String::from_utf8_lossy(&o.stdout).into_owned())
             } else {
-                Err(Error::CliphistReturnCodeError(o.status.code().unwrap_or(1)))
+                Err(Error::CliphistReturnErrorCode(o.status.code().unwrap_or(1)))
             }
         }
         Err(e) => Err(e),
@@ -63,11 +76,17 @@ fn init(config_dir: RString) -> State {
         s.split('\n')
             .filter_map(|l| l.split_once('\t'))
             .enumerate()
-            .map(|(id, (a, b))| (id, a.to_string(), b.to_string()))
+            .map(|(id, (a, b))| CliphistItem {
+                id,
+                cliphist_id: a.to_string(),
+                content: b.to_string(),
+            })
             .collect::<Vec<_>>()
     });
 
-    history.map(|history| State { config, history }).unwrap()
+    history
+        .map(|history: Vec<CliphistItem>| State { config, history })
+        .unwrap()
 }
 
 #[info]
@@ -89,43 +108,31 @@ fn get_matches(input: RString, state: &State) -> RVec<Match> {
         let entries = &state.history[..state.config.max_entries];
         entries
             .iter()
-            .map(|(id, _, entry)| {
-                let title = entry.clone();
+            .map(|item| {
+                let title = item.content.clone();
                 Match {
                     title: title.into(),
                     description: ROption::RNone,
                     use_pango: false,
                     icon: ROption::RNone,
-                    id: ROption::RSome(*id as u64),
+                    id: ROption::RSome(item.id as u64),
                 }
             })
             .collect()
     } else {
-        let matcher = fuzzy_matcher::skim::SkimMatcherV2::default().smart_case();
-        let mut entries = state
-            .history
-            .iter()
-            .filter_map(|(id, _, entry)| {
-                let score = matcher.fuzzy_match(entry, cleaned_input).unwrap_or(0);
-                if score > 0 {
-                    Some((id, entry, score))
-                } else {
-                    None
-                }
-            })
-            .collect::<Vec<_>>();
-        entries.sort_by(|a, b| b.2.cmp(&a.2));
+        let mut entries = fuzzy_match(cleaned_input, &state.history);
+        entries.sort_by(|a, b| b.1.cmp(&a.1));
         entries.truncate(state.config.max_entries);
         entries
             .into_iter()
-            .map(|(id, entry, _)| {
-                let title = entry.clone();
+            .map(|(item, _)| {
+                let title = item.content.clone();
                 Match {
                     title: title.into(),
                     description: ROption::RNone,
                     use_pango: false,
                     icon: ROption::RNone,
-                    id: ROption::RSome(*id as u64),
+                    id: ROption::RSome(item.id as u64),
                 }
             })
             .collect()
@@ -137,9 +144,9 @@ fn handler(selection: Match, state: &State) -> HandleResult {
     let id = state
         .history
         .iter()
-        .find_map(|(id, cliphist_id, _)| {
-            if *id as u64 == selection.id.unwrap() {
-                Some(cliphist_id)
+        .find_map(|item| {
+            if item.id as u64 == selection.id.unwrap() {
+                Some(item.cliphist_id.clone())
             } else {
                 None
             }
@@ -155,20 +162,12 @@ fn handler(selection: Match, state: &State) -> HandleResult {
         .map_err(Error::CliphistCommandFailed);
 
     let output = child.and_then(|mut c| {
-        let write_to_stdin = c
-            .stdin
-            .take()
-            .ok_or(Error::StdinError)
-            .and_then(|mut stdin| {
-                std::thread::spawn(move || {
-                    stdin
-                        .write_all(id.as_bytes())
-                        .map_err(|_| Error::StdinError)
-                })
+        let write_to_stdin = c.stdin.take().ok_or(Error::Stdin).and_then(|mut stdin| {
+            std::thread::spawn(move || stdin.write_all(id.as_bytes()).map_err(|_| Error::Stdin))
                 .join()
-                .map_err(|_| Error::Threaderror)
+                .map_err(|_| Error::Thread)
                 .and_then(|r| r)
-            });
+        });
         write_to_stdin.and_then(|_| c.wait_with_output().map_err(Error::CliphistCommandFailed))
     });
 

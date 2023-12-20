@@ -1,11 +1,10 @@
 [workspace]
-members = ["cliphist"]
+members = ["cliphist", "utils"]
 resolver = "2"
 
 [workspace.dependencies]
 anyrun-plugin = "0.1.0"
 abi_stable = "0.11.3"
-nucleo = "0.2.1"
 ron = "0.8.1"
 serde = { version = "1.0.193", features = ["derive"] }
 
