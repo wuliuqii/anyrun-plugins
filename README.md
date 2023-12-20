@@ -1,5 +1,7 @@
 # My own custom [anyrun](https://github.com/Kirottu/anyrun) plugins
 
+Using helix's new fuzzy matcher [nucleo](https://github.com/helix-editor/nucleo).
+
 ## Installation
 
 Add the flake:
