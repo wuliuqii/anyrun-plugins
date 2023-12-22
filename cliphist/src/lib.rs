@@ -24,14 +24,6 @@ impl Default for Config {
     }
 }
 
-#[derive(Debug)]
-enum Error {
-    CliphistCommandFailed(std::io::Error),
-    CliphistReturnErrorCode(i32),
-    Stdin,
-    Thread,
-}
-
 struct CliphistItem {
     id: usize,
     cliphist_id: String,
@@ -56,37 +48,24 @@ fn init(config_dir: RString) -> State {
         Err(_) => Config::default(),
     };
 
-    let output = Command::new(&config.cliphist_path)
+    let list_child = Command::new(&config.cliphist_path)
         .args(["list"])
         .output()
-        .map_err(Error::CliphistCommandFailed);
+        .expect("Failed to execute cliphist list command");
+    let list = String::from_utf8_lossy(&list_child.stdout).into_owned();
 
-    let content = match output {
-        Ok(o) => {
-            if o.status.success() {
-                Ok(String::from_utf8_lossy(&o.stdout).into_owned())
-            } else {
-                Err(Error::CliphistReturnErrorCode(o.status.code().unwrap_or(1)))
-            }
-        }
-        Err(e) => Err(e),
-    };
+    let history = list
+        .split('\n')
+        .filter_map(|l| l.split_once('\t'))
+        .enumerate()
+        .map(|(id, (a, b))| CliphistItem {
+            id,
+            cliphist_id: a.to_string(),
+            content: b.to_string(),
+        })
+        .collect::<Vec<_>>();
 
-    let history = content.map(|s| {
-        s.split('\n')
-            .filter_map(|l| l.split_once('\t'))
-            .enumerate()
-            .map(|(id, (a, b))| CliphistItem {
-                id,
-                cliphist_id: a.to_string(),
-                content: b.to_string(),
-            })
-            .collect::<Vec<_>>()
-    });
-
-    history
-        .map(|history: Vec<CliphistItem>| State { config, history })
-        .unwrap()
+    State { config, history }
 }
 
 #[info]
@@ -154,24 +133,28 @@ fn handler(selection: Match, state: &State) -> HandleResult {
         .map(|id| format!("{}\t ", id))
         .unwrap();
 
-    let child = Command::new(&state.config.cliphist_path)
+    let mut decode_child = Command::new(&state.config.cliphist_path)
         .args(["decode"])
         .stdin(Stdio::piped())
         .stdout(Stdio::piped())
         .spawn()
-        .map_err(Error::CliphistCommandFailed);
+        .expect("Failed to decode cliphist entry");
 
-    let output = child.and_then(|mut c| {
-        let write_to_stdin = c.stdin.take().ok_or(Error::Stdin).and_then(|mut stdin| {
-            std::thread::spawn(move || stdin.write_all(id.as_bytes()).map_err(|_| Error::Stdin))
-                .join()
-                .map_err(|_| Error::Thread)
-                .and_then(|r| r)
-        });
-        write_to_stdin.and_then(|_| c.wait_with_output().map_err(Error::CliphistCommandFailed))
+    let mut decode_stdin = decode_child.stdin.take().expect("failed to get stdin");
+    std::thread::spawn(move || {
+        decode_stdin
+            .write_all(id.as_bytes())
+            .expect("failed to write to stdin")
     });
 
-    output
-        .map(|bytes| HandleResult::Copy(bytes.stdout.into()))
-        .unwrap()
+    let decode_out = decode_child
+        .stdout
+        .expect("Failed to spawn cliphist decode");
+
+    let _copy_child = Command::new("wl-copy")
+        .stdin(Stdio::from(decode_out))
+        .spawn()
+        .expect("Failed to spawn wl-copy");
+
+    HandleResult::Close
 }

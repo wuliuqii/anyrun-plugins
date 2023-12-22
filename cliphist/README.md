@@ -4,7 +4,7 @@ Find clipboard history using the [cliphist](https://github.com/sentriz/cliphist)
 
 ## Usage
 
-Type in `<prefix><word to find>`, where prefix is the configured prefix (default in Configuration).
+Type in `<prefix><history to find>`, where prefix is the configured prefix (default in Configuration).
 
 ![cliphist](https://github.com/wuliuqii/anyrun-plugins/assets/34090258/eefe24c1-1ee9-4128-83d8-d7282b397095)
 
@@ -23,8 +23,3 @@ Config(
   prefix: ":v",
 )
 ```
-
-## TODO
-
-- [ ] Image support
-
