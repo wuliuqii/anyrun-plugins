@@ -1,0 +1,18 @@
+[package]
+name = "applications"
+version = "0.1.0"
+edition = "2021"
+
+[lib]
+crate-type = ["cdylib"]
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+anyrun-plugin.workspace = true
+abi_stable.workspace = true
+ron.workspace = true
+serde.workspace = true
+utils = { path = "../utils" }
+sublime_fuzzy = "0.7.0"
+fuzzy-matcher = "0.3.7"

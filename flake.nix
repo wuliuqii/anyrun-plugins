@@ -24,6 +24,11 @@
         {
           packages = {
             # expose each plugin as a package
+            applications = pkgs.callPackage ./plugin.nix {
+              inherit inputs lockFile;
+              name = "applications";
+            };
+
             cliphist = pkgs.callPackage ./plugin.nix {
               inherit inputs lockFile;
               name = "cliphist";

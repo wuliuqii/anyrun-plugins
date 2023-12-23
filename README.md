@@ -24,6 +24,7 @@ Add the flake:
 The flake provides multiple packages:
 
 - cliphist - the cliphist plugin
+- applications - the applications plugin
 
 Add to anyrun's home-manager module:
 ```nix
@@ -42,9 +43,10 @@ Add to anyrun's home-manager module:
 }
 ```
 
-
 ## Plugins
 
 - [Cliphist](./cliphist/README.md)
-  - Find clipboard history using the [cliphist](https://github.com/sentriz/cliphist)
+  - Find clipboard history using the [cliphist](https://github.com/sentriz/cliphist).
 
+- [Applications](./applications/README.md)
+  - Launch applications, originally from [anyrun](https://github.com/Kirottu/anyrun/tree/master/plugins/applications), but with nucleo.
