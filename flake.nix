@@ -36,6 +36,11 @@
               name = "cliphist";
             };
 
+            hyprwin = pkgs.callPackage ./plugin.nix {
+              inherit inputs lockFile;
+              name = "hyprwin";
+            };
+
             symbols = pkgs.callPackage ./plugin.nix {
               inherit inputs lockFile;
               name = "symbols";

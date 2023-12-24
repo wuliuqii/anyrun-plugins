@@ -3,9 +3,13 @@
         "alacritty",
         "anyrun",
         "cliphist",
+        "Hypr",
+        "hyprland",
+        "hyprwin",
         "nixpkgs",
         "nucleo",
         "pango",
+        "pkgs",
         "wezterm",
         "wterm",
         "wuliuqii"

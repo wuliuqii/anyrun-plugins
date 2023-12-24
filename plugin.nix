@@ -42,7 +42,7 @@ rustPlatform.buildRustPackage {
   RUST_BACKTRACE = "full";
   copyLibs = true;
   cargoBuildFlags = [ "-p ${name}" ];
-  buildAndTestSubdir = "${name}";
+  buildAndTestSubdir = "plugins/${name}";
 
   meta = with lib; {
     description = "The ${name} plugin for Anyrun";

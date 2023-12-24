@@ -70,10 +70,6 @@ fn info() -> PluginInfo {
 
 #[get_matches]
 fn get_matches(input: RString, state: &State) -> RVec<Match> {
-    if !input.starts_with(&state.config.prefix) {
-        return RVec::new();
-    }
-
     let input = if let Some(input) = input.strip_prefix(&state.config.prefix) {
         input.trim()
     } else {

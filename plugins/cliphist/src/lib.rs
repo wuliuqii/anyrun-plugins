@@ -78,49 +78,28 @@ fn info() -> PluginInfo {
 
 #[get_matches]
 fn get_matches(input: RString, state: &State) -> RVec<Match> {
-    if !input.starts_with(&state.config.prefix) {
-        return RVec::new();
-    }
-
-    let cleaned_input = if let Some(input) = input.strip_prefix(&state.config.prefix) {
+    let input = if let Some(input) = input.strip_prefix(&state.config.prefix) {
         input.trim()
     } else {
         return RVec::new();
     };
 
-    if cleaned_input.is_empty() {
-        let entries = &state.history[..state.config.max_entries];
-        entries
-            .iter()
-            .map(|item| {
-                let title = item.content.clone();
-                Match {
-                    title: title.into(),
-                    description: ROption::RNone,
-                    use_pango: false,
-                    icon: ROption::RNone,
-                    id: ROption::RSome(item.id as u64),
-                }
-            })
-            .collect()
-    } else {
-        let mut entries = fuzzy_match(cleaned_input, &state.history);
-        entries.sort_by(|a, b| b.1.cmp(&a.1));
-        entries.truncate(state.config.max_entries);
-        entries
-            .into_iter()
-            .map(|(item, _)| {
-                let title = item.content.clone();
-                Match {
-                    title: title.into(),
-                    description: ROption::RNone,
-                    use_pango: false,
-                    icon: ROption::RNone,
-                    id: ROption::RSome(item.id as u64),
-                }
-            })
-            .collect()
-    }
+    let mut entries = fuzzy_match(input, &state.history);
+    entries.sort_by(|a, b| b.1.cmp(&a.1));
+    entries.truncate(state.config.max_entries);
+    entries
+        .into_iter()
+        .map(|(item, _)| {
+            let title = item.content.clone();
+            Match {
+                title: title.into(),
+                description: ROption::RNone,
+                use_pango: false,
+                icon: ROption::RNone,
+                id: ROption::RSome(item.id as u64),
+            }
+        })
+        .collect()
 }
 
 #[handler]

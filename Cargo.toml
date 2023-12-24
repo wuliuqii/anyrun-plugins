@@ -1,6 +1,7 @@
 [workspace]
 members = [
     "plugins/cliphist",
+    "plugins/hyprwin",
     "plugins/applications",
     "plugins/symbols",
     "utils",

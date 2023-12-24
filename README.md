@@ -24,6 +24,7 @@ Add the flake:
 The flake provides multiple packages:
 
 - cliphist - the cliphist plugin
+- hyprwin - the hyprwin plugin
 - applications - the applications plugin
 - symbols - the symbols plugin
 
@@ -48,6 +49,9 @@ Add to anyrun's home-manager module:
 
 - [Cliphist](./plugins/cliphist/README.md)
   - Find clipboard history using the [cliphist](https://github.com/sentriz/cliphist).
+  
+- [Hyprwin](./plugins/hyprwin/README.md)
+  - Move to the selected hyprland window.
 
 - [Applications](./plugins/applications/README.md)
   - Launch applications, originally from [anyrun](https://github.com/Kirottu/anyrun/tree/master/plugins/applications), but with nucleo.
