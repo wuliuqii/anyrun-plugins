@@ -82,7 +82,12 @@ fn get_matches(input: RString, state: &State) -> RVec<Match> {
         return RVec::new();
     }
 
-    let cleaned_input = &input[state.config.prefix.len()..];
+    let cleaned_input = if let Some(input) = input.strip_prefix(&state.config.prefix) {
+        input.trim()
+    } else {
+        return RVec::new();
+    };
+
     if cleaned_input.is_empty() {
         let entries = &state.history[..state.config.max_entries];
         entries

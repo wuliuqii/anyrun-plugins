@@ -13,7 +13,7 @@
 , ...
 }:
 let
-  cargoToml = builtins.fromTOML (builtins.readFile ./${name}/Cargo.toml);
+  cargoToml = builtins.fromTOML (builtins.readFile ./plugins/${name}/Cargo.toml);
 in
 rustPlatform.buildRustPackage {
   pname = cargoToml.package.name;

@@ -22,6 +22,8 @@
           lockFile = ./Cargo.lock;
         in
         {
+          formatter = pkgs.nixpkgs-fmt;
+
           packages = {
             # expose each plugin as a package
             applications = pkgs.callPackage ./plugin.nix {
@@ -32,6 +34,11 @@
             cliphist = pkgs.callPackage ./plugin.nix {
               inherit inputs lockFile;
               name = "cliphist";
+            };
+
+            symbols = pkgs.callPackage ./plugin.nix {
+              inherit inputs lockFile;
+              name = "symbols";
             };
           };
         };

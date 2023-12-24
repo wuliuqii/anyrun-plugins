@@ -1,5 +1,5 @@
 [package]
-name = "applications"
+name = "symbols"
 version = "0.1.0"
 edition = "2021"
 
@@ -13,6 +13,4 @@ anyrun-plugin.workspace = true
 abi_stable.workspace = true
 ron.workspace = true
 serde.workspace = true
-utils = { path = "../utils" }
-sublime_fuzzy = "0.7.0"
-fuzzy-matcher = "0.3.7"
+utils = { path = "../../utils" }

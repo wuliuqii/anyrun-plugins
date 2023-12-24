@@ -1,5 +1,10 @@
 [workspace]
-members = ["cliphist", "applications", "utils"]
+members = [
+    "plugins/cliphist",
+    "plugins/applications",
+    "plugins/symbols",
+    "utils",
+]
 resolver = "2"
 
 [workspace.dependencies]
