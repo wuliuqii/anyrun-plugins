@@ -19,7 +19,7 @@ impl Default for Config {
         Self {
             max_entries: 10,
             cliphist_path: "cliphist".into(),
-            prefix: ":v".into(),
+            prefix: ".".into(),
         }
     }
 }

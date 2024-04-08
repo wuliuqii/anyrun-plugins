@@ -37,7 +37,7 @@ impl Default for Config {
     fn default() -> Self {
         Self {
             max_entries: 5,
-            prefix: ":w".into(),
+            prefix: "/".into(),
         }
     }
 }
